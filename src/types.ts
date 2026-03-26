@@ -13,5 +13,5 @@ export interface ISectionNavOptions {
 
 export interface ISectionNavInstance {
   destroy: () => void;
-  navigate: (sectionId: string) => void;
+  navigateTo: (sectionId: string) => void;
 };
