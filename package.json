@@ -2,12 +2,25 @@
   "name": "hashless",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "sideEffects": false,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsup",
+    "lint": "eslint src --ext .ts",
+    "release": "changeset publish"
   },
   "keywords": [],
-  "author": "",
+  "author": "Joshua Enikele",
   "license": "ISC",
   "packageManager": "pnpm@10.28.2",
   "devDependencies": {
