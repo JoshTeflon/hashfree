@@ -1,7 +1,7 @@
 import { createSectionObserver } from './observer';
 import { updateUrl } from './history';
 
-import { ISectionNavInstance, ISectionNavOptions } from './types';
+import type { ISectionNavInstance, ISectionNavOptions } from './types';
 
 export const createSectionNav = (
   options: ISectionNavOptions = {}

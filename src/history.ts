@@ -1,4 +1,4 @@
-import { MethodOptions, StrategyOptions } from './types';
+import type { MethodOptions, StrategyOptions } from './types';
 
 export const updateUrl = (
   sectionId: string,
