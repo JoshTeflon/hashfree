@@ -21,7 +21,7 @@ export const createSectionNav = (
     : Array.from(sections);
 
   // intercept anchor clicks to prevent hash appearing momentarily in the URL
-  const handleAnchorClick = (event: MouseEvent) => {
+  const handleAnchorClick = (event: MouseEvent): void => {
     const target = event.target as Element;
     const anchor = target.closest('a[href^="#"]');
 
@@ -48,11 +48,11 @@ export const createSectionNav = (
   );
 
   return {
-    destroy: () => {
+    destroy: (): void => {
       observer.disconnect();
       document.removeEventListener('click', handleAnchorClick);
     },
-    navigateTo: (sectionId: string) => {
+    navigateTo: (sectionId: string): void => {
       const targetSection = document.getElementById(sectionId);
 
       if (!targetSection) return;
