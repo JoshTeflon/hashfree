@@ -2,22 +2,28 @@
   "name": "hashless",
   "version": "1.0.0",
   "description": "",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
   "scripts": {
-    "build": "pnpm run build:js && pnpm run build:types",
-    "build:js": "tsup",
-    "build:types": "tsc --emitDeclarationOnly",
+    "build": "tsdown --config tsdown.config.mts",
+    "build:watch": "tsdown --config tsdown.config.mts --watch",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "lint": "eslint src",
@@ -29,6 +35,7 @@
   "packageManager": "pnpm@10.28.2",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^25.5.0",
     "@typescript-eslint/eslint-plugin": "^8.57.2",
     "@typescript-eslint/parser": "^8.57.2",
     "@vitest/browser": "^4.1.1",
@@ -37,8 +44,8 @@
     "jsdom": "^29.0.1",
     "playwright": "^1.58.2",
     "prettier": "^3.8.1",
-    "tsup": "^8.5.1",
-    "typescript": "^6.0.2",
+    "tsdown": "^0.21.7",
+    "typescript": "^6.0.0",
     "vitest": "^4.1.1"
   }
 }
