@@ -5,8 +5,8 @@ export const updateUrl = (
   strategy: StrategyOptions = 'replace',
   basePath: string = '',
 ): void => {
-  const path = `${basePath}/${sectionId}`;
-  const cleanPath = path.replace(/\/+/g, '/');
+  const path = `${basePath}/${sectionId}`.replace(/\/+/g, '/');
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
 
   const method: MethodOptions = strategy === 'push' ? 'pushState' : 'replaceState';
 
