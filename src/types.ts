@@ -2,7 +2,7 @@ export type StrategyOptions = 'push' | 'replace';
 
 export type MethodOptions = 'pushState' | 'replaceState';
 
-export interface ISectionNavOptions {
+export interface SectionNavOptions {
   sections?: string | NodeListOf<Element> | Element[];
   rootMargin?: string;
   threshold?: number;
@@ -11,7 +11,7 @@ export interface ISectionNavOptions {
   basePath?: string;
 };
 
-export interface ISectionNavInstance {
+export interface SectionNavInstance {
   destroy: () => void;
   navigateTo: (sectionId: string) => void;
 };
