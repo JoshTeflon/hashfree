@@ -5,7 +5,7 @@ export type MethodOptions = 'pushState' | 'replaceState';
 export interface SectionNavOptions {
   sections?: string | NodeListOf<Element> | Element[];
   rootMargin?: string;
-  threshold?: number;
+  threshold?: number | number[];
   updateStrategy?: StrategyOptions;
   onNavigate?: (sectionId: string) => void;
   basePath?: string;
