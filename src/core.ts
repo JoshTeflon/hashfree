@@ -1,7 +1,7 @@
 import { createSectionObserver } from './observer';
 import { updateUrl } from './history';
 
-import type { ISectionNavInstance, ISectionNavOptions } from './types';
+import type { SectionNavInstance, SectionNavOptions } from './types';
 
 let activeClickHandlerCount = 0;
 
@@ -24,8 +24,8 @@ const handleAnchorClick = (event: MouseEvent): void => {
 };
 
 export const createSectionNav = (
-  options: ISectionNavOptions = {}
-): ISectionNavInstance => {
+  options: SectionNavOptions = {}
+): SectionNavInstance => {
   const {
     sections = '[data-section]',
     rootMargin = '0px',
