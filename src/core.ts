@@ -26,6 +26,10 @@ const handleAnchorClick = (event: MouseEvent): void => {
 export const createSectionNav = (
   options: SectionNavOptions = {}
 ): SectionNavInstance => {
+  if (typeof document === 'undefined') {
+    return { destroy: (): void => {}, navigateTo: (): void => {} };
+  }
+
   const {
     sections = '[data-section]',
     rootMargin = '0px',
