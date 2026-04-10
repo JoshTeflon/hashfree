@@ -5,6 +5,8 @@ export const updateUrl = (
   strategy: StrategyOptions = 'replace',
   basePath: string = '',
 ): void => {
+  if (typeof history === 'undefined') return;
+
   const path = `${basePath}/${sectionId}`.replace(/\/+/g, '/');
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
 
