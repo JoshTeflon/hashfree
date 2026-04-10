@@ -31,4 +31,36 @@ describe('updateUrl', () => {
     );
     expect(pushStateSpy.mock.calls[0]?.[2]).not.toContain('#');
   });
+
+  it('handles basePath prefix correctly', () => {
+    const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
+
+    updateUrl('about', 'replace', '/docs');
+
+    expect(replaceStateSpy).toHaveBeenCalledWith({ sectionId: 'about' }, '', '/docs/about');
+  });
+
+  it('collapses double slashes', () => {
+    const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
+
+    updateUrl('about', 'replace', '/');
+
+    expect(replaceStateSpy).toHaveBeenCalledWith({ sectionId: 'about' }, '', '/about');
+  });
+
+  it('handles empty sectionId gracefully', () => {
+    const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
+
+    updateUrl('');
+
+    expect(replaceStateSpy).toHaveBeenCalledWith({ sectionId: '' }, '', '/');
+  });
+
+  it('handles basePath with trailing slash', () => {
+    const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
+
+    updateUrl('about', 'replace', '/docs/');
+
+    expect(replaceStateSpy).toHaveBeenCalledWith({ sectionId: 'about' }, '', '/docs/about');
+  });
 });
