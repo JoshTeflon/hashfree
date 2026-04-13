@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { createSectionNav } from '../../src/core';
-import { makeElement, stubIntersectionObserver } from './utils';
+import { makeAnchor, makeElement, stubIntersectionObserver } from './utils';
 
 describe('integration', () => {
   it('scroll triggers observer -> observer calls updateUrl -> URL is clean', () => {
@@ -24,9 +24,7 @@ describe('integration', () => {
     const section = makeElement('contact');
     section.scrollIntoView = vi.fn();
 
-    const anchor = document.createElement('a');
-    anchor.href = '#contact';
-    document.body.appendChild(anchor);
+    const anchor = makeAnchor('#contact');
 
     createSectionNav({ sections: [section] });
 

@@ -2,6 +2,13 @@ import { vi } from 'vitest';
 
 import { IntersectionObserverStub } from './types';
 
+export const makeAnchor = (href: string): HTMLAnchorElement => {
+  const el = document.createElement('a');
+  el.href = href;
+  document.body.appendChild(el);
+  return el;
+};
+
 export const makeElement = (id: string): HTMLElement => {
   const el = document.createElement('section');
   if (id) el.id = id;
