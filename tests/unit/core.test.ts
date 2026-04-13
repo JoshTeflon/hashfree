@@ -60,6 +60,58 @@ describe('createSectionNav – instance', () => {
   });
 });
 
+describe('createSectionNav – anchor click handling', () => {
+  it('clicking an anchor <a href="#about"> prevents default and scrolls without hash', () => {
+    stubIntersectionObserver();
+
+    const target = makeElement('about');
+    target.scrollIntoView = vi.fn();
+    const scrollSpy = vi.spyOn(target, 'scrollIntoView');
+
+    const anchor = document.createElement('a');
+    anchor.href = '#about';
+    document.body.appendChild(anchor);
+
+    createSectionNav({ sections: [] });
+
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+    Object.defineProperty(event, 'target', { value: anchor });
+    anchor.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(scrollSpy).toHaveBeenCalledWith({ behavior: 'smooth' });
+  });
+
+  it('clicking a non-anchor element does nothing', () => {
+    stubIntersectionObserver();
+
+    const btn = document.createElement('button');
+    document.body.appendChild(btn);
+
+    createSectionNav({ sections: [] });
+
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+    btn.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it('clicking an anchor pointing to a non-existent id does nothing', () => {
+    stubIntersectionObserver();
+
+    const anchor = document.createElement('a');
+    anchor.href = '#does-not-exist';
+    document.body.appendChild(anchor);
+
+    createSectionNav({ sections: [] });
+
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+    anchor.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(false);
+  });
+});
+
 describe('createSectionNav – URL update strategy', () => {
   it('uses replaceState by default', () => {
     const { trigger } = stubIntersectionObserver();
