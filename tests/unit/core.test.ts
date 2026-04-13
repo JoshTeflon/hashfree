@@ -141,3 +141,103 @@ describe('createSectionNav – URL update strategy', () => {
     expect(replaceStateSpy).not.toHaveBeenCalled();
   });
 });
+
+describe('createSectionNav – destroy()', () => {
+  it('disconnects the observer', () => {
+    const { disconnectSpy } = stubIntersectionObserver();
+
+    const instance = createSectionNav({ sections: [] });
+    instance.destroy();
+
+    expect(disconnectSpy).toHaveBeenCalledOnce();
+  });
+
+  it('removes the click event listener', async () => {
+    // Reset module state so activeClickHandlerCount starts at 0
+    vi.resetModules();
+    const { createSectionNav: freshCreate } = await import('../../src/core');
+    stubIntersectionObserver();
+    const removeListenerSpy = vi.spyOn(document, 'removeEventListener');
+
+    const instance = freshCreate({ sections: [] });
+    instance.destroy();
+
+    expect(removeListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+  });
+
+  it('calling destroy() twice does not throw', () => {
+    const { disconnectSpy } = stubIntersectionObserver();
+
+    const instance = createSectionNav({ sections: [] });
+    instance.destroy();
+    expect(() => instance.destroy()).not.toThrow();
+
+    // observer should only be disconnected once
+    expect(disconnectSpy).toHaveBeenCalledOnce();
+  });
+});
+
+describe('createSectionNav – navigateTo()', () => {
+  it('calls scrollIntoView on the correct element', () => {
+    stubIntersectionObserver();
+
+    const section = makeElement('target-section');
+    section.scrollIntoView = vi.fn();
+
+    createSectionNav({ sections: [] });
+    createSectionNav({ sections: [] }).navigateTo('target-section');
+
+    expect(section.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' });
+  });
+
+  it('does not throw with a non-existent id', () => {
+    stubIntersectionObserver();
+
+    const instance = createSectionNav({ sections: [] });
+
+    expect(() => instance.navigateTo('ghost-section')).not.toThrow();
+  });
+});
+
+describe('createSectionNav – callbacks and options forwarding', () => {
+  it('onNavigate callback fires with the correct sectionId', () => {
+    const { trigger } = stubIntersectionObserver();
+    const onNavigate = vi.fn();
+
+    const section = makeElement('pricing');
+    createSectionNav({ sections: [section], onNavigate });
+
+    trigger([{ target: section, isIntersecting: true, intersectionRatio: 0.7 }]);
+
+    expect(onNavigate).toHaveBeenCalledOnce();
+    expect(onNavigate).toHaveBeenCalledWith('pricing');
+  });
+
+  it('updateStrategy option is forwarded to history correctly', () => {
+    const { trigger } = stubIntersectionObserver();
+    const pushStateSpy = vi.spyOn(window.history, 'pushState');
+
+    const section = makeElement('docs');
+    createSectionNav({ sections: [section], updateStrategy: 'push' });
+
+    trigger([{ target: section, isIntersecting: true, intersectionRatio: 0.5 }]);
+
+    expect(pushStateSpy).toHaveBeenCalledWith({ sectionId: 'docs' }, '', '/docs');
+  });
+
+  it('basePath option is forwarded to history correctly', () => {
+    const { trigger } = stubIntersectionObserver();
+    const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
+
+    const section = makeElement('getting-started');
+    createSectionNav({ sections: [section], basePath: '/v2' });
+
+    trigger([{ target: section, isIntersecting: true, intersectionRatio: 0.5 }]);
+
+    expect(replaceStateSpy).toHaveBeenCalledWith(
+      { sectionId: 'getting-started' },
+      '',
+      '/v2/getting-started'
+    );
+  });
+});
