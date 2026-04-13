@@ -44,11 +44,27 @@ export const createSectionNav = (
     ? Array.from(document.querySelectorAll(sections))
     : Array.from(sections);
 
+  const scrollToPathSection = (): void => {
+    const lastSegment = window.location.pathname
+      .replace(/\/$/, '')
+      .split('/')
+      .pop() ?? '';
+
+    if (!lastSegment) return;
+
+    const target = document.getElementById(lastSegment);
+    target?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   if (activeClickHandlerCount === 0) {
     document.addEventListener('click', handleAnchorClick);
   }
 
   activeClickHandlerCount += 1;
+
+  window.addEventListener('popstate', scrollToPathSection);
+
+  scrollToPathSection();
 
   const observer = createSectionObserver(
     els,
@@ -67,6 +83,8 @@ export const createSectionNav = (
 
       destroyed = true;
       observer.disconnect();
+
+      window.removeEventListener('popstate', scrollToPathSection);
 
       activeClickHandlerCount = Math.max(0, activeClickHandlerCount - 1);
 
