@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { createSectionNav } from '../../src/core';
-import { makeElement, stubIntersectionObserver } from './utils';
+import { makeAnchor, makeElement, stubIntersectionObserver } from './utils';
 
 describe('createSectionNav – instance', () => {
   it('returns a valid instance with destroy() and navigateTo()', () => {
@@ -68,9 +68,7 @@ describe('createSectionNav – anchor click handling', () => {
     target.scrollIntoView = vi.fn();
     const scrollSpy = vi.spyOn(target, 'scrollIntoView');
 
-    const anchor = document.createElement('a');
-    anchor.href = '#about';
-    document.body.appendChild(anchor);
+    const anchor = makeAnchor('#about');
 
     createSectionNav({ sections: [] });
 
@@ -99,9 +97,7 @@ describe('createSectionNav – anchor click handling', () => {
   it('clicking an anchor pointing to a non-existent id does nothing', () => {
     stubIntersectionObserver();
 
-    const anchor = document.createElement('a');
-    anchor.href = '#does-not-exist';
-    document.body.appendChild(anchor);
+    const anchor = makeAnchor('#does-not-exist');
 
     createSectionNav({ sections: [] });
 
