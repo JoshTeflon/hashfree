@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hashless e2e fixture</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: sans-serif;
+      }
+
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        gap: 16px;
+        padding: 12px 16px;
+        background: #111;
+        color: #fff;
+        z-index: 10;
+      }
+
+      nav a {
+        color: #fff;
+        text-decoration: none;
+      }
+
+      section {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        border-bottom: 1px solid #ddd;
+      }
+
+      #home {
+        background: #f5f7fa;
+      }
+
+      #about {
+        background: #e8f4ff;
+      }
+
+      #pricing {
+        background: #f3fff1;
+      }
+
+      #contact {
+        background: #fff9ea;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <main>
+      <section id="home" data-section>Home</section>
+      <section id="about" data-section>About</section>
+      <section id="pricing" data-section>Pricing</section>
+      <section id="contact" data-section>Contact</section>
+    </main>
+
+    <script type="module">
+      import { createSectionNav } from '/dist/index.mjs';
+
+      window.__fixtureMarker = `marker-${Math.random().toString(36).slice(2)}`;
+      history.scrollRestoration = 'manual';
+
+      createSectionNav({
+        sections: '[data-section]',
+        threshold: 0.6,
+        updateStrategy: 'push',
+      });
+    </script>
+  </body>
+</html>
