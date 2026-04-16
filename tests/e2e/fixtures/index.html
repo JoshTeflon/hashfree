@@ -72,6 +72,7 @@
       <section id="about" data-section>About</section>
       <section id="pricing" data-section>Pricing</section>
       <section id="contact" data-section>Contact</section>
+      <section id="team" data-section>Team</section>
     </main>
 
     <script type="module">
@@ -80,7 +81,7 @@
       window.__fixtureMarker = `marker-${Math.random().toString(36).slice(2)}`;
       history.scrollRestoration = 'manual';
 
-      createSectionNav({
+      window.__nav = createSectionNav({
         sections: '[data-section]',
         threshold: 0.6,
         updateStrategy: 'push',

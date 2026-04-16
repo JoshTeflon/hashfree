@@ -1,20 +1,6 @@
-import { expect, test, type Page } from 'playwright/test';
+import { expect, test } from 'playwright/test';
 
-const scrollToSection = async (page: Page, sectionId: string): Promise<void> => {
-  await page.locator(`#${sectionId}`).evaluate((el) => {
-    el.scrollIntoView({ block: 'start', behavior: 'auto' });
-  });
-};
-
-const waitForPathname = async (page: Page, expectedPath: string): Promise<void> => {
-  await expect.poll(() => new URL(page.url()).pathname).toBe(expectedPath);
-};
-
-const waitForSectionAtTop = async (page: Page, sectionId: string): Promise<void> => {
-  await expect.poll(async () => {
-    return page.locator(`#${sectionId}`).evaluate((el) => Math.abs(el.getBoundingClientRect().top));
-  }).toBeLessThan(8);
-};
+import { scrollToSection, waitForPathname, waitForSectionAtTop } from './utils';
 
 test('scrolling to a section updates URL to /sectionId, never /#sectionId', async ({ page }) => {
   await page.goto('/');
