@@ -1,7 +1,7 @@
 {
   "name": "hashless",
   "version": "1.0.0",
-  "description": "Ditch the fragment clutter. Hashless strips # from section links for clean, professional, and high-fidelity URL navigation.",
+  "description": "Ditch the fragment clutter. Hashless strips # from section links for clean, professional, and high-fidelity URL navigation for single-page websites.",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
@@ -17,9 +17,7 @@
       }
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "sideEffects": false,
   "scripts": {
     "build": "tsdown --config tsdown.config.mts",
@@ -29,9 +27,9 @@
     "lint": "eslint src",
     "release": "changeset publish"
   },
-  "keywords": [],
+  "keywords": ["scroll", "navigation", "history-api", "intersectionobserver", "spa"],
   "author": "Joshua Enikele",
-  "license": "ISC",
+  "license": "MIT",
   "packageManager": "pnpm@10.28.2",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
