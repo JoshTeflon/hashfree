@@ -2,6 +2,10 @@
   "name": "hashless",
   "version": "1.0.0",
   "description": "Ditch the fragment clutter. Hashless strips # from section links for clean, professional, and high-fidelity URL navigation for single-page websites.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JoshTeflon/hashless.git"
+  },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
