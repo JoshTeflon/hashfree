@@ -57,6 +57,10 @@
       #contact {
         background: #fff9ea;
       }
+
+      #team {
+        background: #f0eaff;
+      }
     </style>
   </head>
   <body>
@@ -68,11 +72,11 @@
     </nav>
 
     <main>
-      <section id="home" data-section>Home</section>
-      <section id="about" data-section>About</section>
-      <section id="pricing" data-section>Pricing</section>
-      <section id="contact" data-section>Contact</section>
-      <section id="team" data-section>Team</section>
+      <section id="home" data-section tabindex="-1">Home</section>
+      <section id="about" data-section tabindex="-1">About</section>
+      <section id="pricing" data-section tabindex="-1">Pricing</section>
+      <section id="contact" data-section tabindex="-1">Contact</section>
+      <section id="team" data-section tabindex="-1">Team</section>
     </main>
 
     <script type="module">
@@ -85,6 +89,15 @@
         sections: '[data-section]',
         threshold: 0.6,
         updateStrategy: 'push',
+        onNavigate: (id) => {
+          document.querySelectorAll('nav a').forEach((a) => {
+            if (a.getAttribute('href') === `#${id}`) {
+              a.setAttribute('aria-current', 'page');
+            } else {
+              a.removeAttribute('aria-current');
+            }
+          });
+        },
       });
     </script>
   </body>
