@@ -3,9 +3,13 @@ import { updateUrl } from './history';
 
 import type { SectionNavInstance, SectionNavOptions } from './types';
 
-let activeClickHandlerCount = 0;
+type ScrollBehaviorResolver = () => ScrollBehavior;
+
+const clickResolvers = new Set<ScrollBehaviorResolver>();
 
 const handleAnchorClick = (event: MouseEvent): void => {
+  if (clickResolvers.size === 0) return;
+
   const target = event.target;
 
   if (!(target instanceof Element)) return;
@@ -19,8 +23,10 @@ const handleAnchorClick = (event: MouseEvent): void => {
 
   if (!targetSection) return;
 
+  const resolve = clickResolvers.values().next().value as ScrollBehaviorResolver;
+
   event.preventDefault();
-  targetSection.scrollIntoView({ behavior: 'smooth' });
+  targetSection.scrollIntoView({ behavior: resolve() });
 };
 
 export const createSectionNav = (
@@ -37,9 +43,12 @@ export const createSectionNav = (
     updateStrategy = 'replace',
     onNavigate,
     basePath = '',
+    scrollBehavior,
   } = options;
 
-  // resolve elements
+  const resolveScrollBehavior = (): ScrollBehavior =>
+    scrollBehavior ?? (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
+
   const els: Element[] = typeof sections === 'string'
     ? Array.from(document.querySelectorAll(sections))
     : Array.from(sections);
@@ -53,14 +62,13 @@ export const createSectionNav = (
     if (!lastSegment) return;
 
     const target = document.getElementById(lastSegment);
-    target?.scrollIntoView({ behavior: 'smooth' });
+    target?.scrollIntoView({ behavior: resolveScrollBehavior() });
   };
 
-  if (activeClickHandlerCount === 0) {
+  if (clickResolvers.size === 0) {
     document.addEventListener('click', handleAnchorClick);
   }
-
-  activeClickHandlerCount += 1;
+  clickResolvers.add(resolveScrollBehavior);
 
   window.addEventListener('popstate', scrollToPathSection);
 
@@ -84,20 +92,19 @@ export const createSectionNav = (
       destroyed = true;
       observer.disconnect();
 
-      window.removeEventListener('popstate', scrollToPathSection);
-
-      activeClickHandlerCount = Math.max(0, activeClickHandlerCount - 1);
-
-      if (activeClickHandlerCount === 0) {
+      clickResolvers.delete(resolveScrollBehavior);
+      if (clickResolvers.size === 0) {
         document.removeEventListener('click', handleAnchorClick);
       }
+      window.removeEventListener('popstate', scrollToPathSection);
     },
     navigateTo: (sectionId: string): void => {
       const targetSection = document.getElementById(sectionId);
 
       if (!targetSection) return;
 
-      targetSection.scrollIntoView({ behavior: 'smooth' });
+      targetSection.scrollIntoView({ behavior: resolveScrollBehavior() });
+      targetSection.focus({ preventScroll: true });
     }
   };
 };

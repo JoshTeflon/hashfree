@@ -9,6 +9,7 @@ export interface SectionNavOptions {
   updateStrategy?: StrategyOptions;
   onNavigate?: (sectionId: string) => void;
   basePath?: string;
+  scrollBehavior?: ScrollBehavior;
 };
 
 export interface SectionNavInstance {
