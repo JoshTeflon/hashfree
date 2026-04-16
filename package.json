@@ -24,15 +24,31 @@
     "build:watch": "tsdown --config tsdown.config.mts --watch",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:size": "size-limit",
+    "test:bundle": "node --test tests/bundle/index.test.mjs",
     "lint": "eslint src",
     "release": "changeset publish"
   },
+  "size-limit": [
+    {
+      "name": "full bundle (gzipped)",
+      "path": "./dist/index.mjs",
+      "limit": "2 kB"
+    },
+    {
+      "name": "tree-shaking: type-only import",
+      "path": "./dist/index.mjs",
+      "import": "{}",
+      "limit": "0 B"
+    }
+  ],
   "keywords": ["scroll", "navigation", "history-api", "intersectionobserver", "spa"],
   "author": "Joshua Enikele",
   "license": "MIT",
   "packageManager": "pnpm@10.28.2",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@size-limit/preset-small-lib": "^12.1.0",
     "@types/node": "^25.5.0",
     "@typescript-eslint/eslint-plugin": "^8.57.2",
     "@typescript-eslint/parser": "^8.57.2",
@@ -42,6 +58,7 @@
     "jsdom": "^29.0.1",
     "playwright": "^1.58.2",
     "prettier": "^3.8.1",
+    "size-limit": "^12.1.0",
     "tsdown": "^0.21.7",
     "typescript": "^6.0.0",
     "vitest": "^4.1.1"
