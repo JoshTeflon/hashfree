@@ -15,7 +15,14 @@ It watches visible sections with `IntersectionObserver`, updates the path with t
 ## Installation
 
 ```bash
+# npm
 npm install hashless
+
+# pnpm
+pnpm add hashless
+
+# yarn
+yarn add hashless
 ```
 
 ## How It Works
@@ -93,6 +100,7 @@ Creates section navigation and returns a controller object.
 | `updateStrategy` | `'push' \| 'replace'` | `'replace'` | Chooses `history.pushState` or `history.replaceState` |
 | `onNavigate` | `(sectionId: string) => void` | `undefined` | Called when the most visible observed section changes |
 | `basePath` | `string` | `''` | Prefix added before the section id in the rewritten URL |
+| `scrollBehavior` | `'smooth' \| 'auto' \| 'instant'` | auto-detected | Scroll behavior used when scrolling to sections. When omitted, uses `'smooth'` unless the user has `prefers-reduced-motion: reduce` set, in which case `'auto'` is used |
 
 #### Return Value
 
@@ -119,12 +127,3 @@ Smooth-scrolls to a section by its `id`.
 - URL updates use the History API and do not trigger full page reloads.
 - Generated paths are normalized to avoid duplicate slashes.
 - If your page lives under a nested route such as `/docs`, set `basePath: '/docs'` so section updates do not rewrite the URL to the site root.
-
-## Development
-
-```bash
-pnpm install
-pnpm build
-pnpm lint
-pnpm test
-```
