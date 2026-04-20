@@ -100,6 +100,7 @@ Creates section navigation and returns a controller object.
 | `updateStrategy` | `'push' \| 'replace'` | `'replace'` | Chooses `history.pushState` or `history.replaceState` |
 | `onNavigate` | `(sectionId: string) => void` | `undefined` | Called when the most visible observed section changes |
 | `basePath` | `string` | `''` | Prefix added before the section id in the rewritten URL |
+| `scrollBehavior` | `'smooth' \| 'auto' \| 'instant'` | auto-detected | Scroll behavior used when scrolling to sections. When omitted, uses `'smooth'` unless the user has `prefers-reduced-motion: reduce` set, in which case `'auto'` is used |
 
 #### Return Value
 
