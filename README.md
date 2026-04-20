@@ -15,7 +15,14 @@ It watches visible sections with `IntersectionObserver`, updates the path with t
 ## Installation
 
 ```bash
+# npm
 npm install hashless
+
+# pnpm
+pnpm add hashless
+
+# yarn
+yarn add hashless
 ```
 
 ## How It Works
