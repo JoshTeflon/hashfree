@@ -31,7 +31,10 @@
     "test:size": "size-limit",
     "test:bundle": "node --test tests/bundle/index.test.mjs",
     "lint": "eslint src",
-    "release": "changeset publish"
+    "typecheck": "tsc --noEmit",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm build && changeset publish"
   },
   "size-limit": [
     {
@@ -51,6 +54,8 @@
   "license": "MIT",
   "packageManager": "pnpm@10.28.2",
   "devDependencies": {
+    "@changesets/changelog-github": "^0.6.0",
+    "@changesets/cli": "^2.31.0",
     "@eslint/js": "^10.0.1",
     "@size-limit/preset-small-lib": "^12.1.0",
     "@types/node": "^25.5.0",
