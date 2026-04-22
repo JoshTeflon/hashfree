@@ -53,6 +53,8 @@ export const createSectionNav = (
     ? Array.from(document.querySelectorAll(sections))
     : Array.from(sections);
 
+  let isHistoryNavigation = false;
+
   const scrollToPathSection = (): void => {
     const lastSegment = window.location.pathname
       .replace(/\/$/, '')
@@ -62,7 +64,30 @@ export const createSectionNav = (
     if (!lastSegment) return;
 
     const target = document.getElementById(lastSegment);
-    target?.scrollIntoView({ behavior: resolveScrollBehavior() });
+
+    if (!target) return;
+
+    const rect = target.getBoundingClientRect();
+    const alreadyVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+
+    isHistoryNavigation = true;
+    let resolved = false;
+
+    const clearNav = (): void => {
+      if (resolved) return;
+      resolved = true;
+      isHistoryNavigation = false;
+      onNavigate?.(lastSegment);
+    };
+
+    if (alreadyVisible) {
+      // No scroll will occur so scrollend won't fire; clear after IO has settled
+      requestAnimationFrame(() => requestAnimationFrame(clearNav));
+    } else {
+      window.addEventListener('scrollend', clearNav, { once: true });
+    }
+
+    target.scrollIntoView({ behavior: resolveScrollBehavior() });
   };
 
   if (clickResolvers.size === 0) {
@@ -77,6 +102,7 @@ export const createSectionNav = (
   const observer = createSectionObserver(
     els,
     (id) => {
+      if (isHistoryNavigation) return;
       updateUrl(id, updateStrategy, basePath);
       onNavigate?.(id);
     },
@@ -90,6 +116,7 @@ export const createSectionNav = (
       if (destroyed) return;
 
       destroyed = true;
+      isHistoryNavigation = false;
       observer.disconnect();
 
       clickResolvers.delete(resolveScrollBehavior);
