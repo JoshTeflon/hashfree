@@ -46,7 +46,7 @@ Open an issue describing the use case you want to solve. Note that **hashless is
 
 ## Setting Up the Project Locally
 
-Requires [Node.js](https://nodejs.org) ≥ 20 and [pnpm](https://pnpm.io).
+Requires [Node.js](https://nodejs.org) ≥ 24 and [pnpm](https://pnpm.io).
 
 ```bash
 git clone https://github.com/JoshTeflon/hashless.git
