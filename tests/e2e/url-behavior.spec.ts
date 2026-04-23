@@ -76,3 +76,68 @@ test('refreshing the page on /about keeps the user on the about section', async 
   await waitForPathname(page, '/about');
   await waitForSectionAtTop(page, 'about');
 });
+
+test('browser back button works for multiple steps (home -> about -> pricing -> back -> back)', async ({ page }) => {
+  await page.goto('/home');
+
+  await scrollToSection(page, 'about');
+  await waitForPathname(page, '/about');
+
+  await scrollToSection(page, 'pricing');
+  await waitForPathname(page, '/pricing');
+
+  await scrollToSection(page, 'contact');
+  await waitForPathname(page, '/contact');
+
+  await page.goBack();
+  await waitForPathname(page, '/pricing');
+  await waitForSectionAtTop(page, 'pricing');
+
+  await page.goBack();
+  await waitForPathname(page, '/about');
+  await waitForSectionAtTop(page, 'about');
+});
+
+test('browser forward button works for multiple steps after going back', async ({ page }) => {
+  await page.goto('/home');
+
+  await scrollToSection(page, 'about');
+  await waitForPathname(page, '/about');
+
+  await scrollToSection(page, 'pricing');
+  await waitForPathname(page, '/pricing');
+
+  await scrollToSection(page, 'contact');
+  await waitForPathname(page, '/contact');
+
+  await page.goBack();
+  await waitForPathname(page, '/pricing');
+
+  await page.goBack();
+  await waitForPathname(page, '/about');
+
+  await page.goForward();
+  await waitForPathname(page, '/pricing');
+  await waitForSectionAtTop(page, 'pricing');
+
+  await page.goForward();
+  await waitForPathname(page, '/contact');
+  await waitForSectionAtTop(page, 'contact');
+});
+
+test('going back does not destroy forward history (URL remains correct after back then forward)', async ({ page }) => {
+  await page.goto('/home');
+
+  await scrollToSection(page, 'about');
+  await waitForPathname(page, '/about');
+
+  await scrollToSection(page, 'pricing');
+  await waitForPathname(page, '/pricing');
+
+  await page.goBack();
+  await waitForPathname(page, '/about');
+
+  await page.goForward();
+  await waitForPathname(page, '/pricing');
+  await waitForSectionAtTop(page, 'pricing');
+});

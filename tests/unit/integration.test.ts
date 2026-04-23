@@ -123,3 +123,129 @@ describe('integration', () => {
     expect(capturedOptions()).toMatchObject({ rootMargin: '-64px 0px' });
   });
 });
+
+describe('integration – popstate / history navigation', () => {
+  it('observer does not update URL while a popstate scroll is in progress', async () => {
+    const { trigger } = stubIntersectionObserver();
+    const pushStateSpy = vi.spyOn(window.history, 'pushState');
+    const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
+
+    window.history.replaceState({}, '', '/pricing');
+    const section = makeElement('pricing');
+    section.scrollIntoView = vi.fn();
+
+    createSectionNav({ sections: [section], updateStrategy: 'push' });
+
+    // Clear the initial-mount call
+    pushStateSpy.mockClear();
+    replaceStateSpy.mockClear();
+
+    // Fire popstate – this sets isHistoryNavigation = true
+    window.dispatchEvent(new PopStateEvent('popstate'));
+
+    // IO fires while history nav is still in progress
+    trigger([{ target: section, isIntersecting: true, intersectionRatio: 0.9 }]);
+
+    // Neither pushState nor replaceState should have been called by the observer
+    expect(pushStateSpy).not.toHaveBeenCalled();
+    expect(replaceStateSpy).not.toHaveBeenCalled();
+  });
+
+  it('observer resumes URL updates after popstate scroll settles (rAF path)', async () => {
+    vi.useFakeTimers();
+
+    const { trigger } = stubIntersectionObserver();
+    const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
+
+    window.history.replaceState({}, '', '/pricing');
+    const section = makeElement('pricing');
+    section.scrollIntoView = vi.fn();
+
+    createSectionNav({ sections: [section] });
+
+    replaceStateSpy.mockClear();
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+
+    // Flush two rAF ticks to clear isHistoryNavigation
+    await vi.runAllTimersAsync();
+
+    // Now a new section becomes visible – observer should update URL again
+    const newSection = makeElement('contact');
+    trigger([{ target: newSection, isIntersecting: true, intersectionRatio: 0.8 }]);
+
+    expect(replaceStateSpy).toHaveBeenCalledWith({ sectionId: 'contact' }, '', '/contact');
+
+    vi.useRealTimers();
+  });
+
+  it('onNavigate fires with the popstate target id after scroll settles', async () => {
+    vi.useFakeTimers();
+
+    stubIntersectionObserver();
+    const onNavigate = vi.fn();
+
+    window.history.replaceState({}, '', '/about');
+    const section = makeElement('about');
+    section.scrollIntoView = vi.fn();
+
+    createSectionNav({ sections: [section], onNavigate });
+
+    // Flush the initial-mount rAF so isHistoryNavigation is cleared, then reset mock
+    await vi.runAllTimersAsync();
+    onNavigate.mockClear();
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+
+    expect(onNavigate).not.toHaveBeenCalled();
+
+    await vi.runAllTimersAsync();
+
+    expect(onNavigate).toHaveBeenCalledOnce();
+    expect(onNavigate).toHaveBeenCalledWith('about');
+
+    vi.useRealTimers();
+  });
+
+  it('push strategy: navigating forward then back preserves multi-step history stack', async () => {
+    vi.useFakeTimers();
+
+    const { trigger } = stubIntersectionObserver();
+    const pushStateSpy = vi.spyOn(window.history, 'pushState');
+
+    window.history.replaceState({}, '', '/home');
+    const home = makeElement('home');
+    const about = makeElement('about');
+    const pricing = makeElement('pricing');
+    [home, about, pricing].forEach(el => { el.scrollIntoView = vi.fn(); });
+
+    createSectionNav({ sections: [home, about, pricing], updateStrategy: 'push' });
+
+    // Flush the initial-mount rAF so isHistoryNavigation is cleared
+    await vi.runAllTimersAsync();
+    pushStateSpy.mockClear();
+
+    trigger([{ target: about, isIntersecting: true, intersectionRatio: 0.8 }]);
+    expect(pushStateSpy).toHaveBeenLastCalledWith({ sectionId: 'about' }, '', '/about');
+
+    trigger([{ target: pricing, isIntersecting: true, intersectionRatio: 0.8 }]);
+    expect(pushStateSpy).toHaveBeenLastCalledWith({ sectionId: 'pricing' }, '', '/pricing');
+
+    pushStateSpy.mockClear();
+
+    window.history.replaceState({}, '', '/about');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+
+    trigger([{ target: about, isIntersecting: true, intersectionRatio: 0.8 }]);
+    expect(pushStateSpy).not.toHaveBeenCalled();
+
+    // After scroll settles, observer resumes – further user scrolls push correctly
+    await vi.runAllTimersAsync();
+
+    trigger([{ target: pricing, isIntersecting: true, intersectionRatio: 0.8 }]);
+    // Pathname is still /about at this point, so pushState should be called for /pricing
+    expect(pushStateSpy).toHaveBeenCalledWith({ sectionId: 'pricing' }, '', '/pricing');
+
+    vi.useRealTimers();
+  });
+});
