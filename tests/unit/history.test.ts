@@ -63,4 +63,27 @@ describe('updateUrl', () => {
 
     expect(replaceStateSpy).toHaveBeenCalledWith({ sectionId: 'about' }, '', '/docs/about');
   });
+
+  it('downgrades push to replace when URL already matches (dedup guard)', () => {
+    const pushStateSpy = vi.spyOn(window.history, 'pushState');
+    const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
+
+    // Pre-set the URL to /pricing so the dedup guard activates
+    window.history.replaceState({}, '', '/pricing');
+
+    updateUrl('pricing', 'push');
+
+    expect(pushStateSpy).not.toHaveBeenCalled();
+    expect(replaceStateSpy).toHaveBeenCalledWith({ sectionId: 'pricing' }, '', '/pricing');
+  });
+
+  it('still uses pushState when URL does not yet match the section', () => {
+    const pushStateSpy = vi.spyOn(window.history, 'pushState');
+
+    window.history.replaceState({}, '', '/home');
+
+    updateUrl('about', 'push');
+
+    expect(pushStateSpy).toHaveBeenCalledWith({ sectionId: 'about' }, '', '/about');
+  });
 });

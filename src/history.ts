@@ -10,7 +10,12 @@ export const updateUrl = (
   const path = `${basePath}/${sectionId}`.replace(/\/+/g, '/');
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
 
-  const method: MethodOptions = strategy === 'push' ? 'pushState' : 'replaceState';
+  // Avoid pushing a duplicate entry when the URL already points to this section
+  // (e.g. an IO callback that races with scrollend after history navigation).
+  const effectiveStrategy: StrategyOptions =
+    strategy === 'push' && window.location.pathname === cleanPath ? 'replace' : strategy;
+
+  const method: MethodOptions = effectiveStrategy === 'push' ? 'pushState' : 'replaceState';
 
   history[method]({ sectionId }, '', cleanPath);
 };

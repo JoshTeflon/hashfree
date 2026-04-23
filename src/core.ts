@@ -53,6 +53,8 @@ export const createSectionNav = (
     ? Array.from(document.querySelectorAll(sections))
     : Array.from(sections);
 
+  let isHistoryNavigation = false;
+
   const scrollToPathSection = (): void => {
     const lastSegment = window.location.pathname
       .replace(/\/$/, '')
@@ -62,7 +64,23 @@ export const createSectionNav = (
     if (!lastSegment) return;
 
     const target = document.getElementById(lastSegment);
-    target?.scrollIntoView({ behavior: resolveScrollBehavior() });
+
+    if (!target) return;
+
+    isHistoryNavigation = true;
+    let resolved = false;
+
+    const clearNav = (): void => {
+      if (resolved) return;
+      resolved = true;
+      isHistoryNavigation = false;
+      onNavigate?.(lastSegment);
+    };
+
+    // Use two rAF ticks to let the IntersectionObserver batch settle before
+    requestAnimationFrame(() => requestAnimationFrame(clearNav));
+
+    target.scrollIntoView({ behavior: resolveScrollBehavior() });
   };
 
   if (clickResolvers.size === 0) {
@@ -77,6 +95,7 @@ export const createSectionNav = (
   const observer = createSectionObserver(
     els,
     (id) => {
+      if (isHistoryNavigation) return;
       updateUrl(id, updateStrategy, basePath);
       onNavigate?.(id);
     },
@@ -90,6 +109,7 @@ export const createSectionNav = (
       if (destroyed) return;
 
       destroyed = true;
+      isHistoryNavigation = false;
       observer.disconnect();
 
       clickResolvers.delete(resolveScrollBehavior);
