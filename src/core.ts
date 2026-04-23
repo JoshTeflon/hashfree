@@ -67,9 +67,6 @@ export const createSectionNav = (
 
     if (!target) return;
 
-    const rect = target.getBoundingClientRect();
-    const alreadyVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
-
     isHistoryNavigation = true;
     let resolved = false;
 
@@ -80,12 +77,8 @@ export const createSectionNav = (
       onNavigate?.(lastSegment);
     };
 
-    if (alreadyVisible) {
-      // No scroll will occur so scrollend won't fire; clear after IO has settled
-      requestAnimationFrame(() => requestAnimationFrame(clearNav));
-    } else {
-      window.addEventListener('scrollend', clearNav, { once: true });
-    }
+    // Use two rAF ticks to let the IntersectionObserver batch settle before
+    requestAnimationFrame(() => requestAnimationFrame(clearNav));
 
     target.scrollIntoView({ behavior: resolveScrollBehavior() });
   };
