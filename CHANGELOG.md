@@ -46,8 +46,8 @@ Categories:
   ### Security   — security patches
 
 Keep entries short and written from the user's perspective.
-Reference a PR or issue number where helpful: ([#42](https://github.com/JoshTeflon/hashless/pull/42))
+Reference a PR or issue number where helpful: ([#42](https://github.com/JoshTeflon/hashfree/pull/42))
 -->
 
-[unreleased]: https://github.com/JoshTeflon/hashless/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/JoshTeflon/hashless/releases/tag/v1.0.0
+[unreleased]: https://github.com/JoshTeflon/hashfree/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/JoshTeflon/hashfree/releases/tag/v1.0.0

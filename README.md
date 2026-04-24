@@ -1,6 +1,6 @@
-# hashless
+# hashfree
 
-`hashless` is a small browser utility for section-based navigation without `#hash` fragments in the URL.
+`hashfree` is a small browser utility for section-based navigation without `#hash` fragments in the URL.
 
 It watches visible sections with `IntersectionObserver`, updates the path with the History API, and intercepts in-page anchor clicks so navigation stays clean while still scrolling smoothly.
 
@@ -16,18 +16,18 @@ It watches visible sections with `IntersectionObserver`, updates the path with t
 
 ```bash
 # npm
-npm install hashless
+npm install hashfree
 
 # pnpm
-pnpm add hashless
+pnpm add hashfree
 
 # yarn
-yarn add hashless
+yarn add hashfree
 ```
 
 ## How It Works
 
-Given page sections with `id` attributes and links that point to those ids, `hashless`:
+Given page sections with `id` attributes and links that point to those ids, `hashfree`:
 
 1. Prevents the browser from briefly writing `#section-id` to the URL.
 2. Smooth-scrolls to the target section when an anchor is clicked.
@@ -43,7 +43,7 @@ Example:
 ## Basic Usage
 
 ```ts
-import { createSectionNav } from 'hashless';
+import { createSectionNav } from 'hashfree';
 
 const nav = createSectionNav({
   sections: 'section',
@@ -77,7 +77,7 @@ nav.destroy();
 ```
 
 ```ts
-import { createSectionNav } from 'hashless';
+import { createSectionNav } from 'hashfree';
 
 createSectionNav({
   sections: '[data-section]',

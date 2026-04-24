@@ -19,7 +19,7 @@ describe('updateUrl', () => {
     expect(replaceStateSpy.mock.calls[0]?.[2]).not.toContain('#');
   });
 
-  it('normalizes basePath and keeps URL hashless with pushState strategy', () => {
+  it('normalizes basePath and keeps URL hashfree with pushState strategy', () => {
     const pushStateSpy = vi.spyOn(window.history, 'pushState');
 
     updateUrl('api-reference', 'push', '/docs/');
