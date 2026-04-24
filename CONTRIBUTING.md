@@ -1,4 +1,4 @@
-# Contributing to hashless
+# Contributing to hashfree
 
 Thank you for your interest in contributing! This document explains how to get involved.
 
@@ -6,7 +6,7 @@ Thank you for your interest in contributing! This document explains how to get i
 
 ## Code of Conduct
 
-Be kind. hashless is a small, focused project maintained in spare time. Hostile, dismissive, or harassing issues and pull requests will be closed without discussion.
+Be kind. hashfree is a small, focused project maintained in spare time. Hostile, dismissive, or harassing issues and pull requests will be closed without discussion.
 
 ---
 
@@ -32,7 +32,7 @@ For bug fixes with a clear reproduction this is not required. For new features, 
 
 1. Search existing issues before opening a new one.
 2. Include a **minimal reproduction** — a CodePen, StackBlitz, or small repo that demonstrates the problem.
-3. State the browser(s), OS, and version of hashless where you saw the issue.
+3. State the browser(s), OS, and version of hashfree where you saw the issue.
 
 Reports without a reproduction will be deprioritised.
 
@@ -40,7 +40,7 @@ Reports without a reproduction will be deprioritised.
 
 ## Requesting a Feature
 
-Open an issue describing the use case you want to solve. Note that **hashless is intentionally small and has zero runtime dependencies**. Features that would add weight, introduce dependencies, or push the gzipped bundle past 2 kB will generally not be accepted unless they address a significant gap.
+Open an issue describing the use case you want to solve. Note that **hashfree is intentionally small and has zero runtime dependencies**. Features that would add weight, introduce dependencies, or push the gzipped bundle past 2 kB will generally not be accepted unless they address a significant gap.
 
 ---
 
@@ -49,8 +49,8 @@ Open an issue describing the use case you want to solve. Note that **hashless is
 Requires [Node.js](https://nodejs.org) ≥ 24 and [pnpm](https://pnpm.io).
 
 ```bash
-git clone https://github.com/JoshTeflon/hashless.git
-cd hashless
+git clone https://github.com/JoshTeflon/hashfree.git
+cd hashfree
 pnpm install
 ```
 
@@ -83,7 +83,7 @@ pnpm install
    - `docs/short-description` — documentation only
    - `refactor/short-description` — internal change with no behaviour change
 
-2. **hashless has zero runtime dependencies and must stay that way.** Do not add anything to `dependencies` in `package.json`.
+2. **hashfree has zero runtime dependencies and must stay that way.** Do not add anything to `dependencies` in `package.json`.
 
 3. All source code lives in `src/`. It must pass strict TypeScript (`strict: true`, `noImplicitAny`, `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`).
 
@@ -178,7 +178,7 @@ pnpm changeset
 
 The interactive prompt will ask:
 
-1. **Which packages to include** — select `hashless` (press `Space`, then `Enter`).
+1. **Which packages to include** — select `hashfree` (press `Space`, then `Enter`).
 2. **Bump type:**
    - `patch` — bug fixes, documentation, internal changes with no API impact (`1.0.0` → `1.0.1`)
    - `minor` — new backwards-compatible options or behaviours (`1.0.0` → `1.1.0`)
