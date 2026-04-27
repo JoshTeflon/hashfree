@@ -4,7 +4,7 @@
   "description": "Ditch the fragment clutter. Hashfree strips # from section links for clean, professional, and high-fidelity URL navigation for single-page websites.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/JoshTeflon/hashfree.git"
+    "url": "git+https://github.com/JoshTeflon/hashfree.git"
   },
   "homepage": "https://JoshTeflon.github.io/hashfree",
   "bugs": {
@@ -25,7 +25,9 @@
       }
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsdown --config tsdown.config.mts",
@@ -53,7 +55,18 @@
       "limit": "0 B"
     }
   ],
-  "keywords": ["hashfree", "url", "navigation", "scroll", "history-api", "hash", "intersection-observer", "spa", "single-page", "typescript"],
+  "keywords": [
+    "hashfree",
+    "url",
+    "navigation",
+    "scroll",
+    "history-api",
+    "hash",
+    "intersection-observer",
+    "spa",
+    "single-page",
+    "typescript"
+  ],
   "author": "Joshua Enikele",
   "license": "MIT",
   "packageManager": "pnpm@10.28.2",
