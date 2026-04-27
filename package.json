@@ -4,7 +4,7 @@
   "description": "Ditch the fragment clutter. Hashfree strips # from section links for clean, professional, and high-fidelity URL navigation for single-page websites.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/JoshTeflon/hashfree.git"
+    "url": "git+https://github.com/JoshTeflon/hashfree.git"
   },
   "homepage": "https://JoshTeflon.github.io/hashfree",
   "bugs": {
@@ -12,7 +12,7 @@
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
@@ -25,10 +25,12 @@
       }
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsdown --config tsdown.config.mts",
+    "build": "tsdown --config tsdown.config.mts && shx cp dist/index.d.mts dist/index.d.ts",
     "build:watch": "tsdown --config tsdown.config.mts --watch",
     "test": "vitest run",
     "test:e2e": "playwright test",
@@ -53,7 +55,18 @@
       "limit": "0 B"
     }
   ],
-  "keywords": ["hashfree", "url", "navigation", "scroll", "history-api", "hash", "intersection-observer", "spa", "single-page", "typescript"],
+  "keywords": [
+    "hashfree",
+    "url",
+    "navigation",
+    "scroll",
+    "history-api",
+    "hash",
+    "intersection-observer",
+    "spa",
+    "single-page",
+    "typescript"
+  ],
   "author": "Joshua Enikele",
   "license": "MIT",
   "packageManager": "pnpm@10.28.2",
@@ -71,6 +84,7 @@
     "jsdom": "^29.0.1",
     "playwright": "^1.58.2",
     "prettier": "^3.8.1",
+    "shx": "^0.4.0",
     "size-limit": "^12.1.0",
     "tsdown": "^0.21.7",
     "typescript": "^6.0.0",
