@@ -1,0 +1,1163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hashfree - clean URL navigation, zero hashes</title>
+    <meta name="description" content="A lightweight, framework-agnostic TypeScript library that removes hash fragments from browser URLs during single-page section navigation." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+    
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0a0a0b;
+        --bg-2: #111114;
+        --bg-3: #18181d;
+        --border: #2a2a32;
+        --border-2: #3a3a45;
+        --text: #e8e8ed;
+        --text-2: #9898a8;
+        --text-3: #5a5a6a;
+        --accent: #f0c060;
+        --accent-2: #e0a840;
+        --green: #5ddb8a;
+        --red: #f06060;
+        --radius: 10px;
+        --nav-h: 60px;
+        --font-base: 1rem;
+        --font-sm: 0.875rem;
+        --font-xs: 0.75rem;
+        --font-xxs: 0.625rem;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: 'DM Sans', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        font-size: var(--font-base);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--nav-h);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2rem;
+        background: rgba(10, 10, 11, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border);
+        z-index: 100;
+      }
+
+      .nav-logo {
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-base);
+        font-weight: 500;
+        color: var(--accent);
+        letter-spacing: -0.02em;
+        text-decoration: none;
+      }
+
+      .nav-logo span {
+        color: var(--text-3);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 0.25rem;
+        list-style: none;
+      }
+
+      .nav-links a {
+        display: block;
+        padding: 0.375rem 0.875rem;
+        font-size: var(--font-sm);
+        font-weight: 400;
+        color: var(--text-2);
+        text-decoration: none;
+        border-radius: 6px;
+        transition: color 0.15s, background 0.15s;
+        letter-spacing: 0.01em;
+      }
+
+      .nav-links a:hover {
+        color: var(--text);
+        background: var(--bg-3);
+      }
+
+      .nav-links a[aria-current="page"] {
+        color: var(--accent);
+        background: rgba(240, 192, 96, 0.08);
+      }
+
+      .nav-install {
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-xs);
+        padding: 0.5rem 0.875rem;
+        background: var(--bg-3);
+        border: 1px solid var(--border-2);
+        color: var(--text-2);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+
+      .nav-install:hover {
+        color: var(--text);
+        border-color: var(--accent);
+      }
+
+      .url-bar-wrapper {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 200;
+        animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.8s both;
+      }
+
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+        to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+      }
+
+      .url-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        background: var(--bg-2);
+        border: 1px solid var(--border-2);
+        border-radius: 40px;
+        padding: 0.625rem 0.875rem;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+        min-width: 20rem;
+        max-width: 28.75rem;
+        width: max-content;
+      }
+
+      .url-bar-dots {
+        display: flex;
+        gap: 0.25rem;
+        flex-shrink: 0;
+      }
+
+      .url-bar-dots span {
+        width: 0.375rem;
+        height: 0.375rem;
+        border-radius: 50%;
+        background: var(--border-2);
+      }
+
+      .url-bar-dots span:nth-child(1) { background: #f06060; }
+      .url-bar-dots span:nth-child(2) { background: #f0c060; }
+      .url-bar-dots span:nth-child(3) { background: #5ddb8a; }
+
+      .url-bar-text {
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-xs);
+        color: var(--text-2);
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .url-bar-text .url-origin { color: var(--text-3); }
+      .url-bar-text .url-path {
+        color: var(--accent);
+        transition: opacity 0.15s;
+      }
+
+      .url-badge {
+        font-size: var(--font-xxs);
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+        border-radius: 20px;
+        background: rgba(93, 219, 138, 0.12);
+        color: var(--green);
+        border: 1px solid rgba(93, 219, 138, 0.2);
+        white-space: nowrap;
+        flex-shrink: 0;
+        letter-spacing: 0.04em;
+        font-family: 'DM Mono', monospace;
+      }
+
+      section {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: calc(var(--nav-h) + 2rem) 2rem 4rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .section-inner {
+        max-width: 45rem;
+        width: 100%;
+        margin: 0 auto;
+      }
+
+      .section-label {
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-xs);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-3);
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+      }
+
+      .section-label::before {
+        content: '/';
+        display: block;
+      }
+
+      #home {
+        background: var(--bg);
+      }
+
+      #home::before {
+        content: '';
+        position: absolute;
+        top: -12.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50rem;
+        height: 37.5rem;
+        background: radial-gradient(ellipse at center, rgba(240,192,96,0.06) 0%, transparent 70%);
+        pointer-events: none;
+      }
+
+      .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.75rem;
+        color: var(--accent);
+        background: rgba(240,192,96,0.08);
+        border: 1px solid rgba(240,192,96,0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        margin-bottom: 1.75rem;
+        letter-spacing: 0.04em;
+      }
+
+      .hero-eyebrow::before {
+        content: '';
+        width: 0.375rem;
+        height: 0.375rem;
+        border-radius: 50%;
+        background: var(--accent);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50%       { opacity: 0.5; transform: scale(0.8); }
+      }
+
+      .hero-title {
+        font-family: 'DM Serif Display', serif;
+        font-size: clamp(2.5rem, 7vw, 5rem);
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        color: var(--text);
+        margin-bottom: 1.5rem;
+      }
+
+      .hero-title em {
+        font-style: italic;
+        color: var(--accent);
+      }
+
+      .hero-body {
+        font-size: var(--font-base);
+        color: var(--text-2);
+        line-height: 1.7;
+        max-width: 35rem;
+        margin-bottom: 2.5rem;
+        font-weight: 300;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: var(--accent);
+        color: #0a0a0b;
+        font-size: var(--font-sm);
+        font-weight: 500;
+        border-radius: 8px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.1s;
+        letter-spacing: -0.01em;
+      }
+
+      .btn-primary:hover { background: var(--accent-2); transform: translateY(-1px); }
+      .btn-primary:active { transform: translateY(0); }
+
+      .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        color: var(--text-2);
+        font-size: var(--font-sm);
+        font-weight: 400;
+        border-radius: 8px;
+        text-decoration: none;
+        border: 1px solid var(--border-2);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .btn-secondary:hover { color: var(--text); border-color: var(--border-2); background: var(--bg-3); }
+
+      .hero-stat-row {
+        display: flex;
+        gap: 2rem;
+        margin-top: 3.5rem;
+        padding-top: 2.5rem;
+        border-top: 1px solid var(--border);
+        flex-wrap: wrap;
+      }
+
+      .hero-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .hero-stat-val {
+        font-family: 'DM Mono', monospace;
+        font-size: 1.375rem;
+        color: var(--text);
+        font-weight: 500;
+        letter-spacing: -0.02em;
+      }
+
+      .hero-stat-label {
+        font-size: var(--font-xs);
+        color: var(--text-3);
+        letter-spacing: 0.02em;
+      }
+
+      #how-it-works {
+        background: var(--bg-2);
+      }
+
+      .compare-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 2.5rem;
+      }
+
+      .compare-card {
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--bg);
+      }
+
+      .compare-card.bad  { border-color: rgba(240,96,96,0.25); background: rgba(240,96,96,0.03); }
+      .compare-card.good { border-color: rgba(93,219,138,0.25); background: rgba(93,219,138,0.03); }
+
+      .compare-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-xs);
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+        padding: 0.25rem 0.625rem;
+        border-radius: 20px;
+      }
+
+      .compare-tag.bad  { color: var(--red); background: rgba(240,96,96,0.1);  }
+      .compare-tag.good { color: var(--green); background: rgba(93,219,138,0.1); }
+
+      .compare-url {
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-sm);
+        color: var(--text);
+        background: var(--bg-3);
+        border: 1px solid var(--border);
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        margin-bottom: 0.75rem;
+        word-break: break-all;
+      }
+
+      .compare-url .hash { color: var(--red); }
+      .compare-url .path { color: var(--green); }
+
+      .compare-desc { font-size: var(--font-sm); color: var(--text-2); line-height: 1.6; }
+
+      .section-title {
+        font-family: 'DM Serif Display', serif;
+        font-size: clamp(2rem, 4vw, 3rem);
+        line-height: 1.12;
+        letter-spacing: -0.02em;
+        color: var(--text);
+        margin-bottom: 1rem;
+      }
+
+      .section-title em { font-style: italic; color: var(--accent); }
+
+      .section-body {
+        font-size: var(--font-base);
+        color: var(--text-2);
+        line-height: 1.7;
+        max-width: 35rem;
+        font-weight: 300;
+      }
+
+      #install { background: var(--bg); }
+
+      .install-block {
+        margin-top: 2.5rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      .install-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg-2);
+      }
+
+      .install-tab {
+        padding: 0.625rem 1rem;
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-xs);
+        color: var(--text-3);
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        border-bottom: 2px solid transparent;
+        transition: all 0.15s;
+        letter-spacing: 0.04em;
+      }
+
+      .install-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+      .install-tab:hover:not(.active) { color: var(--text-2); }
+
+      .install-code {
+        padding: 1.25rem 1.5rem;
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-sm);
+        background: var(--bg-3);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .install-code .prefix { color: var(--text-3); user-select: none; }
+
+      .copy-btn {
+        padding: 0.375rem 0.75rem;
+        border: 1px solid var(--border-2);
+        background: var(--bg-2);
+        color: var(--text-2);
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-xs);
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.15s;
+        flex-shrink: 0;
+        letter-spacing: 0.04em;
+      }
+
+      .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+      .copy-btn.copied { color: var(--green); border-color: rgba(93,219,138,0.4); }
+
+      .usage-block {
+        margin-top: 1.5rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      .code-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.625rem 1rem;
+        background: var(--bg-2);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .code-filename {
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-xs);
+        color: var(--text-3);
+      }
+
+      pre {
+        padding: 1.5rem;
+        background: var(--bg-3);
+        overflow-x: auto;
+        font-size: var(--font-sm);
+        line-height: 1.7;
+      }
+
+      code {
+        font-family: 'DM Mono', monospace;
+      }
+
+      .kw  { color: #c792ea; }
+      .fn  { color: #82aaff; }
+      .str { color: #c3e88d; }
+      .cm  { color: var(--text-3); }
+      .prop{ color: var(--accent); }
+      .num { color: #f78c6c; }
+
+      #api { background: var(--bg-2); }
+
+      .api-table {
+        margin-top: 2.25rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        width: 100%;
+      }
+
+      .api-row {
+        display: grid;
+        grid-template-columns: 11.25rem 1fr 1fr;
+        border-bottom: 1px solid var(--border);
+        transition: background 0.15s;
+      }
+
+      .api-row:last-child { border-bottom: none; }
+      .api-row:hover { background: var(--bg-3); }
+
+      .api-row.header {
+        background: var(--bg-2);
+        font-size: var(--font-xs);
+        font-family: 'DM Mono', monospace;
+        color: var(--text-3);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .api-cell {
+        padding: 0.875rem 1.25rem;
+        font-size: var(--font-sm);
+        border-right: 1px solid var(--border);
+      }
+
+      .api-cell:last-child { border-right: none; }
+
+      .api-cell code {
+        font-size: var(--font-xs);
+        color: var(--accent);
+      }
+
+      .api-cell .type {
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-xs);
+        color: #c792ea;
+      }
+
+      .api-cell .default {
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-xs);
+        color: var(--text-3);
+      }
+
+      #compatibility { background: var(--bg); }
+
+      #compatibility::after {
+        content: '';
+        position: absolute;
+        bottom: -6.25rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 37.5rem;
+        height: 25rem;
+        background: radial-gradient(ellipse at center, rgba(240,192,96,0.05) 0%, transparent 70%);
+        pointer-events: none;
+      }
+
+      .compat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
+        gap: var(--font-xs);
+        margin-top: 2.5rem;
+      }
+
+      .compat-card {
+        padding: 1.25rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-2);
+        transition: border-color 0.2s, transform 0.2s;
+        cursor: default;
+      }
+
+      .compat-card:hover {
+        border-color: var(--border-2);
+        transform: translateY(-2px);
+      }
+
+      .compat-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.625rem;
+      }
+
+      .compat-name {
+        font-size: var(--font-sm);
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 0.25rem;
+      }
+
+      .compat-note {
+        font-size: var(--font-xs);
+        color: var(--text-2);
+      }
+
+      .compat-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-top: 0.625rem;
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-xxs);
+        padding: 0.125rem 0.5rem;
+        border-radius: 20px;
+        letter-spacing: 0.04em;
+      }
+
+      .tag-ready { background: rgba(93,219,138,0.1);  color: var(--green);  border: 1px solid rgba(93,219,138,0.2);  }
+      .tag-soon { background: rgba(240,192,96,0.1);  color: var(--accent); border: 1px solid rgba(240,192,96,0.2);  }
+
+      footer {
+        text-align: center;
+        padding: 2rem;
+        border-top: 1px solid var(--border);
+        font-family: 'DM Mono', monospace;
+        font-size: var(--font-xs);
+        color: var(--text-3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      footer a { color: var(--text-3); text-decoration: none; transition: color 0.15s; }
+      footer a:hover { color: var(--accent); }
+
+      .fade-in {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1);
+      }
+
+      .fade-in.visible { opacity: 1; transform: none; }
+
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: var(--bg); }
+      ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
+
+      @media (max-width: 680px) {
+        nav { padding: 0 1rem; }
+        .nav-install { display: none; }
+        .nav-links a { padding: 0.375rem 0.625rem; font-size: var(--font-xs); }
+        .hero-title { font-size: 2.5rem; }
+        .compare-grid { grid-template-columns: 1fr; }
+        .api-row { grid-template-columns: 8.75rem 1fr; }
+        .api-row .api-cell:last-child { display: none; }
+        section { padding: calc(var(--nav-h) + 1.5rem) 1.25rem 4rem; }
+        .url-bar { min-width: 17.5rem; }
+        .hero-stat-row { gap: 1.25rem; }
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <nav>
+      <a href="#home" class="nav-logo">hash<span>free</span></a>
+
+      <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#how-it-works">How it works</a></li>
+        <li><a href="#install">Install</a></li>
+        <li><a href="#api">API</a></li>
+        <li><a href="#compatibility">Compatibility</a></li>
+      </ul>
+
+      <button class="nav-install" onclick="copyInstall(this)">pnpm add hashfree</button>
+    </nav>
+
+    <div class="url-bar-wrapper">
+      <div class="url-bar">
+        <div class="url-bar-dots">
+          <span></span><span></span><span></span>
+        </div>
+
+        <div class="url-bar-text">
+          <span class="url-origin">yourdomain.com</span><span class="url-path" id="liveUrlPath">/home</span>
+        </div>
+
+        <span class="url-badge">no # ever</span>
+      </div>
+    </div>
+
+    <section id="home" data-section tabindex="-1">
+      <div class="section-inner">
+        <div class="section-label">hashfree</div>
+
+        <div class="hero-eyebrow">v0.1.0 - now on npm</div>
+
+        <h1 class="hero-title">
+          URL navigation<br>
+          <em>without the hash.</em>
+        </h1>
+
+        <p class="hero-body">
+          A lightweight, framework-agnostic TypeScript library. Scroll through sections and the URL updates cleanly to <code style="font-family: 'DM Mono',monospace; font-size: var(--font-sm); color: var(--accent)">/about</code> instead of
+          <code style="font-family: 'DM Mono',monospace; font-size: var(--font-sm); color: var(--red); text-decoration: line-through">/#about</code>.
+          <br /> Zero dependencies. Under 2kb.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#install" class="btn-primary">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            Get started
+          </a>
+
+          <a href="https://github.com/JoshTeflon/hashfree" class="btn-secondary" target="_blank" rel="noopener">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48v-1.69c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.58 9.58 0 0112 6.8c.85.004 1.7.115 2.5.337 1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10.01 10.01 0 0022 12c0-5.52-4.48-10-10-10z"/></svg>
+            GitHub
+          </a>
+        </div>
+
+        <div class="hero-stat-row">
+          <div class="hero-stat">
+            <span class="hero-stat-val">&lt; 2kb</span>
+            <span class="hero-stat-label">gzipped</span>
+          </div>
+
+          <div class="hero-stat">
+            <span class="hero-stat-val">0</span>
+            <span class="hero-stat-label">dependencies</span>
+          </div>
+
+          <div class="hero-stat">
+            <span class="hero-stat-val">ESM + CJS</span>
+            <span class="hero-stat-label">dual build</span>
+          </div>
+
+          <div class="hero-stat">
+            <span class="hero-stat-val">TypeScript</span>
+            <span class="hero-stat-label">strict mode</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how-it-works" data-section tabindex="-1">
+      <div class="section-inner fade-in">
+        <div class="section-label">How it works</div>
+
+        <h2 class="section-title">Before <em>&amp;</em> after</h2>
+
+        <p class="section-body">
+          Standard anchor links append a hash to your URL when users navigate.
+          hashfree intercepts clicks and uses the History API with
+          IntersectionObserver to keep URLs clean at all times.
+        </p>
+
+        <div class="compare-grid">
+          <div class="compare-card bad">
+            <div class="compare-tag bad">✕ Without hashfree</div>
+            <div class="compare-url">yourdomain.com<span class="hash">/#about</span></div>
+            <p class="compare-desc">Hash fragments look unprofessional, clutter shared links, and leak implementation detail to your users.</p>
+          </div>
+
+          <div class="compare-card good">
+            <div class="compare-tag good">✓ With hashfree</div>
+            <div class="compare-url">yourdomain.com<span class="path">/about</span></div>
+            <p class="compare-desc">Clean, shareable, bookmark-friendly URLs, exactly what your users expect from a modern website.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="install" data-section tabindex="-1">
+      <div class="section-inner fade-in">
+        <div class="section-label">Install</div>
+
+        <h2 class="section-title">Up in <em>five lines.</em></h2>
+
+        <p class="section-body">
+          Install from npm, add <code style="font-family: 'DM Mono',monospace; font-size: var(--font-sm); color: var(--accent)">data-section</code> to your section elements, call
+          <code style="font-family: 'DM Mono',monospace; font-size: var(--font-sm); color: var(--accent)">createSectionNav()</code> once. Done.
+        </p>
+
+        <div class="install-block">
+          <div class="install-tabs">
+            <button class="install-tab active" onclick="switchPm('pnpm',this)">pnpm</button>
+            <button class="install-tab" onclick="switchPm('npm',this)">npm</button>
+            <button class="install-tab" onclick="switchPm('yarn',this)">yarn</button>
+            <button class="install-tab" onclick="switchPm('bun',this)">bun</button>
+          </div>
+
+          <div class="install-code">
+            <span><span class="prefix">$ </span><span id="pmCmd">pnpm add hashfree</span></span>
+            <button class="copy-btn" onclick="copyInstall(this)">copy</button>
+          </div>
+        </div>
+
+        <div class="usage-block">
+          <div class="code-header">
+            <span class="code-filename">main.ts</span>
+            <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          </div>
+
+          <pre><code id="usageCode"><span class="kw">import</span> { <span class="fn">createSectionNav</span> } <span class="kw">from</span> <span class="str">'hashfree'</span>;
+
+<span class="kw">const</span> nav = <span class="fn">createSectionNav</span>({
+  <span class="prop">sections</span>: <span class="str">'[data-section]'</span>,   <span class="cm">// CSS selector or Element[]</span>
+  <span class="prop">updateStrategy</span>: <span class="str">'replace'</span>,    <span class="cm">// 'push' | 'replace'</span>
+  <span class="prop">threshold</span>: <span class="num">0.6</span>,               <span class="cm">// 0–1, visibility ratio</span>
+  <span class="prop">onNavigate</span>: (id) => {
+    <span class="cm">// fires on every section change</span>
+    <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">`navigated to: <span class="kw">${</span>id<span class="kw">}</span>`</span>);
+  },
+});
+
+<span class="cm">// later, when the component unmounts:</span>
+nav.<span class="fn">destroy</span>();</code></pre>
+        </div>
+        <p style="margin-top: 1rem; font-size:var(--font-xs); color: var(--text-3);">
+          ⓘ  Since hashfree rewrites paths (e.g. <code style="font-family:'DM Mono',monospace">/about</code>), configure your server to serve the same HTML for all paths, standard SPA fallback.
+        </p>
+      </div>
+    </section>
+
+    <section id="api" data-section tabindex="-1">
+      <div class="section-inner fade-in">
+        <div class="section-label">API reference</div>
+
+        <h2 class="section-title">Every option, <em>documented.</em></h2>
+
+        <p class="section-body">
+          All options are optional. The defaults work for most single-page sites
+          without any configuration.
+        </p>
+
+        <p style="font-size: var(--font-xs); font-family: 'DM Mono',monospace; color:var(--text-3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.625rem;">
+          createSectionNav( options )
+        </p>
+
+        <div class="api-table" style="margin-bottom: 1.75rem;">
+          <div class="api-row header">
+            <div class="api-cell">Option</div>
+            <div class="api-cell">Type / Default</div>
+            <div class="api-cell">Description</div>
+          </div>
+
+          <div class="api-row">
+            <div class="api-cell"><code>sections</code></div>
+            <div class="api-cell"><span class="type">string | NodeListOf&lt;Element&gt; | Element[]</span> <span class="default">'[data-section]'</span></div>
+            <div class="api-cell" style="color: var(--text-2); font-size: var(--font-xs)">CSS selector, NodeListOf&lt;Element&gt;, or Element array</div>
+          </div>
+
+          <div class="api-row">
+            <div class="api-cell"><code>updateStrategy</code></div>
+            <div class="api-cell"><span class="type">'push' | 'replace'</span> <span class="default">'replace'</span></div>
+            <div class="api-cell" style="color: var(--text-2); font-size: var(--font-xs)">Use pushState or replaceState</div>
+          </div>
+
+          <div class="api-row">
+            <div class="api-cell"><code>threshold</code></div>
+            <div class="api-cell"><span class="type">number | number[]</span> <span class="default">0.5</span></div>
+            <div class="api-cell" style="color: var(--text-2); font-size: var(--font-xs)">Visibility ratio(s) to trigger (0–1)</div>
+          </div>
+
+          <div class="api-row">
+            <div class="api-cell"><code>rootMargin</code></div>
+            <div class="api-cell"><span class="type">string</span> <span class="default">'0px'</span></div>
+            <div class="api-cell" style="color: var(--text-2); font-size: var(--font-xs)">IntersectionObserver rootMargin</div>
+          </div>
+
+          <div class="api-row">
+            <div class="api-cell"><code>basePath</code></div>
+            <div class="api-cell"><span class="type">string</span> <span class="default">''</span></div>
+            <div class="api-cell" style="color: var(--text-2); font-size: var(--font-xs)">Prepended to every URL write. Set to <code>'docs'</code> and scrolling to <code>#about</code> writes <code>/docs/about</code> instead of <code>/about</code></div>
+          </div>
+
+          <div class="api-row">
+            <div class="api-cell"><code>scrollBehavior</code></div>
+            <div class="api-cell"><span class="type">ScrollBehavior</span> <span class="default">undefined</span></div>
+            <div class="api-cell" style="color: var(--text-2); font-size: var(--font-xs)">'smooth' | 'instant' | 'auto'. Unset by default, auto-resolves to 'auto' when prefers-reduced-motion is active, otherwise 'smooth'</div>
+          </div>
+
+          <div class="api-row">
+            <div class="api-cell"><code>onNavigate</code></div>
+            <div class="api-cell"><span class="type">(id: string) => void</span></div>
+            <div class="api-cell" style="color: var(--text-2); font-size: var(--font-xs)">Callback fired on each section change</div>
+          </div>
+        </div>
+
+        <p style="font-size: var(--font-xs); font-family: 'DM Mono',monospace; color: var(--text-3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.625rem;">
+          SectionNavInstance
+        </p>
+
+        <div class="api-table">
+          <div class="api-row header">
+            <div class="api-cell">Method</div>
+            <div class="api-cell">Signature</div>
+            <div class="api-cell">Description</div>
+          </div>
+
+          <div class="api-row">
+            <div class="api-cell"><code>destroy()</code></div>
+            <div class="api-cell"><span class="type">() => void</span></div>
+            <div class="api-cell" style="color: var(--text-2); font-size: var(--font-xs)">Disconnects observer, removes all listeners. Call on unmount.</div>
+          </div>
+
+          <div class="api-row">
+            <div class="api-cell"><code>navigateTo(id)</code></div>
+            <div class="api-cell"><span class="type">(sectionId: string) => void</span></div>
+            <div class="api-cell" style="color: var(--text-2); font-size: var(--font-xs)">Scrolls to a section and focuses it. The URL updates as a side-effect of the IntersectionObserver firing, not synchronously.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="compatibility" data-section tabindex="-1">
+      <div class="section-inner fade-in">
+        <div class="section-label">Compatibility</div>
+
+        <h2 class="section-title">Works <em>everywhere.</em></h2>
+
+        <p class="section-body">
+          The vanilla core works in any JavaScript environment. Framework adapters
+          are coming as separate packages so you only ship what you use.
+        </p>
+
+        <div class="compat-grid">
+          <div class="compat-card">
+            <div class="compat-icon">⚡</div>
+            <div class="compat-name">Vanilla JS / TS</div>
+            <div class="compat-note">Import and call. No framework needed.</div>
+            <span class="compat-tag tag-ready">✓ ready</span>
+          </div>
+
+          <div class="compat-card">
+            <div class="compat-icon">🌊</div>
+            <div class="compat-name">Astro</div>
+            <div class="compat-note">Works in client-side scripts out of the box.</div>
+            <span class="compat-tag tag-ready">✓ ready</span>
+          </div>
+
+          <div class="compat-card">
+            <div class="compat-icon">⚛️</div>
+            <div class="compat-name">React</div>
+            <div class="compat-note">useHashfree() hook, coming in hashfree-react.</div>
+            <span class="compat-tag tag-soon">coming soon</span>
+          </div>
+
+          <div class="compat-card">
+            <div class="compat-icon">💚</div>
+            <div class="compat-name">Vue</div>
+            <div class="compat-note">Composable, coming in hashfree-vue.</div>
+            <span class="compat-tag tag-soon">coming soon</span>
+          </div>
+
+          <div class="compat-card">
+            <div class="compat-icon">🔶</div>
+            <div class="compat-name">Svelte</div>
+            <div class="compat-note">use:hashfree action, coming in hashfree-svelte.</div>
+            <span class="compat-tag tag-soon">coming soon</span>
+          </div>
+
+          <div class="compat-card">
+            <div class="compat-icon">🌐</div>
+            <div class="compat-name">SSR Safe</div>
+            <div class="compat-note">Guards on all browser APIs. No crashes on the server.</div>
+            <span class="compat-tag tag-ready">✓ ready</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>hashfree - MIT licence</span>
+      <a href="https://npmjs.com/package/hashfree" target="_blank" rel="noopener">npm</a>
+      <a href="https://github.com/JoshTeflon/hashfree" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/JoshTeflon/hashfree/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a>
+      <a href="https://github.com/JoshTeflon/hashfree/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+    </footer>
+
+    <script type="module">
+      import { createSectionNav } from 'https://esm.sh/hashfree@0.1.0';
+
+      history.scrollRestoration = 'manual';
+
+      // Instant scroll to the section matching the current URL path on load/refresh.
+      // This runs before createSectionNav so the page is already positioned correctly
+      // when the library's own scrollToPathSection fires internally.
+      const initialSegment = window.location.pathname.replace(/\/$/, '').split('/').pop() ?? '';
+      if (initialSegment) {
+        const initialTarget = document.getElementById(initialSegment);
+        if (initialTarget) {
+          initialTarget.scrollIntoView({ behavior: 'instant', block: 'start' });
+        }
+      }
+
+      const liveUrlPath = document.getElementById('liveUrlPath');
+
+      const nav = createSectionNav({
+        sections: '[data-section]',
+        threshold: 0.6,
+        updateStrategy: 'push',
+        scrollBehavior: 'smooth',
+        onNavigate: (id) => {
+          // Update live URL bar
+          if (liveUrlPath) {
+            liveUrlPath.style.opacity = '0';
+            setTimeout(() => {
+              liveUrlPath.textContent = '/' + id;
+              liveUrlPath.style.opacity = '1';
+            }, 120);
+          }
+
+          // Update aria-current on nav links
+          document.querySelectorAll('.nav-links a').forEach((a) => {
+            if (a.getAttribute('href') === '#' + id) {
+              a.setAttribute('aria-current', 'page');
+            } else {
+              a.removeAttribute('aria-current');
+            }
+          });
+        },
+      });
+
+      window.__nav = nav;
+    </script>
+
+    <script>
+      // Package manager switcher
+      const pmCmds = {
+        pnpm: 'pnpm add hashfree',
+        npm:  'npm install hashfree',
+        yarn: 'yarn add hashfree',
+        bun:  'bun add hashfree',
+      };
+
+      function switchPm(pm, btn) {
+        document.getElementById('pmCmd').textContent = pmCmds[pm];
+        document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+      }
+
+      // Copy install command
+      function copyInstall(btn) {
+        const cmd = document.getElementById('pmCmd')?.textContent
+          || 'pnpm add hashfree';
+        navigator.clipboard.writeText(cmd).then(() => {
+          btn.textContent = 'copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = btn.classList.contains('nav-install') ? 'pnpm add hashfree' : 'copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      }
+
+      // Copy usage code
+      function copyCode(btn) {
+        const raw = `import { createSectionNav } from 'hashfree';
+
+const nav = createSectionNav({
+  sections: '[data-section]',
+  updateStrategy: 'replace',
+  threshold: 0.6,
+  onNavigate: (id) => {
+    console.log(\`navigated to: \${id}\`);
+  },
+});
+
+nav.destroy();`;
+        navigator.clipboard.writeText(raw).then(() => {
+          btn.textContent = 'copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      }
+
+      // Fade-in observer
+      const fadeEls = document.querySelectorAll('.fade-in');
+      const fadeObserver = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            fadeObserver.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.15 });
+
+      fadeEls.forEach(el => fadeObserver.observe(el));
+
+      // Expose helpers globally for inline onclick
+      window.switchPm = switchPm;
+      window.copyInstall = copyInstall;
+      window.copyCode = copyCode;
+    </script>
+
+  </body>
+</html>
