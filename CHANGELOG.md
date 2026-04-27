@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.0] - 2026-04-27
+
 ### Added
 
 - `createSectionNav(options?)` — primary factory function that wires up section-based URL navigation without hash fragments.
@@ -49,5 +53,5 @@ Keep entries short and written from the user's perspective.
 Reference a PR or issue number where helpful: ([#42](https://github.com/JoshTeflon/hashfree/pull/42))
 -->
 
-[unreleased]: https://github.com/JoshTeflon/hashfree/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/JoshTeflon/hashfree/releases/tag/v1.0.0
+[unreleased]: https://github.com/JoshTeflon/hashfree/compare/hashfree@0.1.0...HEAD
+[0.1.0]: https://github.com/JoshTeflon/hashfree/releases/tag/hashfree@0.1.0
