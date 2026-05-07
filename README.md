@@ -1,6 +1,6 @@
 # hashfree
 
-`hashfree` is a small browser utility for section-based navigation without `#hash` fragments in the URL.
+`hashfree` is a small browser utility package for section-based navigation without `#hash` fragments in the URL.
 
 It watches visible sections with `IntersectionObserver`, updates the path with the History API, and intercepts in-page anchor clicks so navigation stays clean while still scrolling smoothly.
 
